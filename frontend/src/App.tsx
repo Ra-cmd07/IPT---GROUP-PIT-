@@ -57,7 +57,6 @@ const App = () => {
               <Route path="/kitchen-queue" element={<OrderQueue />} />
               <Route path="/" element={
                 <div className="text-center py-24 animate-fade-in">
-                  <div className="text-8xl mb-8 animate-float">🚀</div>
                   <h2 className="text-5xl font-black bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent mb-6">Welcome</h2>
                   <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed">
                     Streamline your kitchen operations with real-time order management and live queue tracking.
