@@ -27,8 +27,13 @@ class UserViewSet(viewsets.ViewSet):
             
             # Find user by email
             try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
+                user = User.objects.filter(email=email).first()
+                if not user:
+                    return Response(
+                        {'error': 'Invalid email or password'},
+                        status=status.HTTP_401_UNAUTHORIZED
+                    )
+            except Exception as e:
                 return Response(
                     {'error': 'Invalid email or password'},
                     status=status.HTTP_401_UNAUTHORIZED

@@ -56,7 +56,32 @@ const apiCall = async (url: string, options: RequestInit = {}): Promise<any> => 
     }
 
     if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
+        const text = await response.text();
+        let errorMessage = `API error: ${response.status} ${response.statusText}`;
+        try {
+            const errorData = JSON.parse(text);
+            // Handle different error response formats
+            if (errorData.email && Array.isArray(errorData.email)) {
+                errorMessage = errorData.email[0]; // Get first email error
+            } else if (errorData.error) {
+                errorMessage = errorData.error;
+            } else if (typeof errorData === 'object') {
+                // Get first error message from any field
+                for (const key in errorData) {
+                    if (Array.isArray(errorData[key])) {
+                        errorMessage = errorData[key][0];
+                        break;
+                    } else if (typeof errorData[key] === 'string') {
+                        errorMessage = errorData[key];
+                        break;
+                    }
+                }
+            }
+        } catch (e) {
+            // If not JSON, use the text response
+            if (text) errorMessage = text;
+        }
+        throw new Error(errorMessage);
     }
 
     // Handle empty responses

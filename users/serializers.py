@@ -28,6 +28,12 @@ class UserCreateSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'email', 'password', 'password_confirm', 'first_name', 'last_name', 'address', 'age', 'birthday']
 
+    def validate_email(self, value):
+        """Check that email is unique"""
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email already in use. Please use a different email or try logging in.")
+        return value
+
     def validate(self, data):
         if data['password'] != data.pop('password_confirm'):
             raise serializers.ValidationError({'password': 'Passwords do not match.'})
