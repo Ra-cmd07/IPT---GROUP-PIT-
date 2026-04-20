@@ -13,7 +13,7 @@ const MenuGrid: React.FC<Props> = ({ onAddItem }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const menuImages: Record<number, string> = {
-           // 1: Caesar Salad
+    // 1: Caesar Salad
     1: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop',
     // 2: Tomato Soup
     2: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=300&fit=crop',

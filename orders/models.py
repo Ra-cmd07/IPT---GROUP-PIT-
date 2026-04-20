@@ -39,7 +39,7 @@ class Order(models.Model):
     @property
     def total_price(self):
         return sum(item.subtotal for item in self.items.all())
-
+        
 
 class MenuItem(models.Model):
     CATEGORY_CHOICES = [

@@ -6,17 +6,54 @@ const API_BASE = 'http://localhost:8000/api';
 const ENDPOINTS = {
     menuItems: `${API_BASE}/menu/`,
     orders: `${API_BASE}/orders/`,
+    auth: {
+        login: `${API_BASE}/auth/jwt/create/`,
+        register: `${API_BASE}/auth/users/register/`,
+        profile: `${API_BASE}/users/users/profile/`,
+        profileUpdate: `${API_BASE}/users/users/profile/update/`,
+        refresh: `${API_BASE}/auth/jwt/refresh/`,
+    }
 };
 
 // Real API calls to Django backend
 const apiCall = async (url: string, options: RequestInit = {}): Promise<any> => {
+    const token = localStorage.getItem('access_token');
+    const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+    };
+
+    if (token) {
+        headers['Authorization'] = `JWT ${token}`;
+    }
+
     const response = await fetch(url, {
         ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
+        headers,
     });
+
+    if (response.status === 401) {
+        // Token might be expired, try refresh
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken) {
+            try {
+                const refreshResponse = await fetch(ENDPOINTS.auth.refresh, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh: refreshToken }),
+                });
+                if (refreshResponse.ok) {
+                    const { access } = await refreshResponse.json();
+                    localStorage.setItem('access_token', access);
+                    // Retry original request with new token
+                    return apiCall(url, options);
+                }
+            } catch (error) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+            }
+        }
+    }
 
     if (!response.ok) {
         throw new Error(`API error: ${response.status} ${response.statusText}`);
@@ -33,21 +70,71 @@ const apiCall = async (url: string, options: RequestInit = {}): Promise<any> => 
 };
 
 // React Query hooks
-export const useMenuItems = () => useQuery({
-    queryKey: ['menuItems'],
+export const useMenuItems = (availableOnly = true) => useQuery({
+    queryKey: ['menuItems', availableOnly],
     queryFn: async () => {
-        const response = await apiCall(ENDPOINTS.menuItems);
-        
-        // This is the magic fix! It tells React to look inside 'results'
+        const endpoint = availableOnly ? `${ENDPOINTS.menuItems}?available=true` : ENDPOINTS.menuItems;
+        const response = await apiCall(endpoint);
+
         if (response && Array.isArray(response.results)) {
             return response.results;
         }
-        
-        // Fallback just in case pagination gets turned off later
+
         return Array.isArray(response) ? response : [];
     },
-    staleTime: 5 * 60 * 1000, 
+    staleTime: 5 * 60 * 1000,
 });
+
+export const useCreateMenuItem = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (menuItem: Partial<MenuItem>) => apiCall(ENDPOINTS.menuItems, {
+            method: 'POST',
+            body: JSON.stringify(menuItem),
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+        },
+    });
+};
+
+export const useUpdateMenuItem = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ menuItemId, data }: { menuItemId: number; data: Partial<MenuItem> }) => apiCall(`${ENDPOINTS.menuItems}${menuItemId}/`, {
+            method: 'PATCH',
+            body: JSON.stringify(data),
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+        },
+    });
+};
+
+export const useDeleteMenuItem = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (menuItemId: number) => apiCall(`${ENDPOINTS.menuItems}${menuItemId}/`, {
+            method: 'DELETE',
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+        },
+    });
+};
+
+export const useToggleMenuItemAvailability = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ menuItemId, isAvailable }: { menuItemId: number; isAvailable: boolean }) => apiCall(`${ENDPOINTS.menuItems}${menuItemId}/toggle-availability/`, {
+            method: 'PATCH',
+            body: JSON.stringify({ is_available: isAvailable }),
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+        },
+    });
+};
 
 export const useOrders = () => useQuery({
     queryKey: ['orders'],
@@ -89,4 +176,39 @@ export const useUpdateStatus = (orderId: number) => {
         },
     });
 };
+
+// Authentication functions
+export const login = async (email: string, password: string) => {
+    const response = await apiCall(ENDPOINTS.auth.login, {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+    });
+    if (response.access && response.refresh) {
+        localStorage.setItem('access_token', response.access);
+        localStorage.setItem('refresh_token', response.refresh);
+    }
+    return response;
+};
+
+export const register = async (userData: any) => {
+    return apiCall(ENDPOINTS.auth.register, {
+        method: 'POST',
+        body: JSON.stringify(userData),
+    });
+};
+
+export const getProfile = () => apiCall(ENDPOINTS.auth.profile);
+
+export const updateProfile = (data: any) => apiCall(ENDPOINTS.auth.profileUpdate, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+});
+
+export const logout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+};
+
+export const getAuthToken = () => localStorage.getItem('access_token');
+export const isAuthenticated = () => !!localStorage.getItem('access_token');
 

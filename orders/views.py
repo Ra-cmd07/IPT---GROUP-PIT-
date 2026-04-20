@@ -8,8 +8,27 @@ from .serializers import OrderSerializer, OrderItemSerializer, MenuItemSerialize
 
 
 class MenuItemViewSet(viewsets.ModelViewSet):
-    queryset = MenuItem.objects.filter(is_available=True)
+    queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        availability = self.request.query_params.get('available')
+        if availability == 'true':
+            return queryset.filter(is_available=True)
+        if availability == 'false':
+            return queryset.filter(is_available=False)
+        return queryset
+
+    @action(detail=True, methods=['patch'], url_path='toggle-availability')
+    def toggle_availability(self, request, pk=None):
+        item = self.get_object()
+        if 'is_available' in request.data:
+            item.is_available = bool(request.data.get('is_available'))
+        else:
+            item.is_available = not item.is_available
+        item.save()
+        return Response(MenuItemSerializer(item).data)
 
 
 class OrderViewSet(viewsets.ModelViewSet):
