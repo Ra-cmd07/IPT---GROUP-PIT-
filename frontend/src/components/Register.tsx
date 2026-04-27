@@ -4,11 +4,10 @@ import { register } from '../api';
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    name: '',
     username: '',
     email: '',
     password: '',
-    password_confirm: '',
+    re_password: '',
     first_name: '',
     last_name: '',
     address: '',
@@ -32,7 +31,7 @@ const Register = () => {
     setError('');
     setLoading(true);
 
-    if (formData.password !== formData.password_confirm) {
+    if (formData.password !== formData.re_password) {
       setError('Passwords do not match');
       setLoading(false);
       return;
@@ -40,11 +39,10 @@ const Register = () => {
 
     try {
       const userData = {
-        name: formData.name,
         username: formData.username,
         email: formData.email,
         password: formData.password,
-        password_confirm: formData.password_confirm,
+        re_password: formData.re_password,
         first_name: formData.first_name,
         last_name: formData.last_name,
         address: formData.address,
@@ -111,20 +109,6 @@ const Register = () => {
               />
             </div>
 
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-                Full Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
-                placeholder="John Doe"
-              />
-            </div>
 
             <div>
               <label htmlFor="first_name" className="block text-sm font-medium text-gray-300 mb-2">
@@ -173,15 +157,15 @@ const Register = () => {
             </div>
 
             <div>
-              <label htmlFor="password_confirm" className="block text-sm font-medium text-gray-300 mb-2">
-                Confirm Password
+              <label htmlFor="re_password" className="block text-sm font-medium text-gray-300 mb-2">
+                Re password
               </label>
               <input
-                id="password_confirm"
-                name="password_confirm"
+                id="re_password"
+                name="re_password"
                 type="password"
                 required
-                value={formData.password_confirm}
+                value={formData.re_password}
                 onChange={handleChange}
                 className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
                 placeholder="••••••••"

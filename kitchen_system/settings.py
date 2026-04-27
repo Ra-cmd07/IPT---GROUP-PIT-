@@ -87,7 +87,7 @@ DATABASES = {
     }
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 # Password validation
@@ -155,6 +155,7 @@ SIMPLE_JWT = {
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
+    'USERNAME_REQUIRED': False,
     'USER_CREATE_PASSWORD_RETYPE': True,
     'SEND_ACTIVATION_EMAIL': True,
     'ACTIVATION_URL': 'http://localhost:3000/activate/{uid}/{token}',
@@ -166,14 +167,15 @@ DJOSER = {
     },
     'SERIALIZERS': {
         'user_create': 'users.serializers.UserCreateSerializer',
+        'user_create_password_retype': 'users.serializers.UserCreateSerializer',
         'user': 'users.serializers.UserSerializer',
     }
 }
 
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_HOST_USER = 'cabalitrae6@email.com'
-# EMAIL_HOST_PASSWORD = 'bdlotgcnmvdbdcgw'
-# EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'cabalitrae6@email.com'
+EMAIL_HOST_PASSWORD = 'bdlotgcnmvdbdcgw'
+EMAIL_USE_TLS = True
 
-# DEFAULT_FROM_EMAIL = 'cabalitrae6@email.com'
+DEFAULT_FROM_EMAIL = 'cabalitrae6@email.com'

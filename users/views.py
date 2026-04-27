@@ -9,8 +9,9 @@ from .models import UserProfile
 from .serializers import UserSerializer, UserCreateSerializer, UserUpdateSerializer
 
 
-class UserViewSet(viewsets.ViewSet):
+class UserViewSet(viewsets.GenericViewSet):
     permission_classes = []
+    serializer_class = UserCreateSerializer
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny], url_path='login')
     def login(self, request):
@@ -63,10 +64,14 @@ class UserViewSet(viewsets.ViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    @action(detail=False, methods=['post'], permission_classes=[AllowAny], url_path='register')
+    @action(detail=False, methods=['get', 'post'], permission_classes=[AllowAny], serializer_class=UserCreateSerializer, url_path='register')
     def register(self, request):
         """Register a new user with profile information."""
-        serializer = UserCreateSerializer(data=request.data)
+        if request.method == 'GET':
+            serializer = self.get_serializer()
+            return Response(serializer.data)
+
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(

@@ -7,6 +7,7 @@ import MenuAdmin from './components/MenuAdmin';
 import Login from './components/Login';
 import Register from './components/Register';
 import Profile from './components/Profile';
+import Activation from './components/Activation';
 import ProtectedRoute from './components/ProtectedRoute';
 import { isAuthenticated, logout } from './api';
 
@@ -105,6 +106,7 @@ const App = () => {
             {/* Auth routes */}
             <Route path="/login" element={authenticated ? <Navigate to="/" /> : <Login />} />
             <Route path="/register" element={authenticated ? <Navigate to="/" /> : <Register />} />
+            <Route path="/activate/:uid/:token" element={<Activation />} />
 
             {/* Protected routes */}
             <Route

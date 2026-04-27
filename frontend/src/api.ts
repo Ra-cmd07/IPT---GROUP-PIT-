@@ -9,6 +9,7 @@ const ENDPOINTS = {
     auth: {
         login: `${API_BASE}/auth/users/login/`,
         register: `${API_BASE}/auth/users/register/`,
+        activation: `${API_BASE}/auth/users/activation/`,
         profile: `${API_BASE}/auth/users/profile/`,
         profileUpdate: `${API_BASE}/auth/users/profile/update/`,
         refresh: `${API_BASE}/auth/jwt/refresh/`,
@@ -219,6 +220,13 @@ export const register = async (userData: any) => {
     return apiCall(ENDPOINTS.auth.register, {
         method: 'POST',
         body: JSON.stringify(userData),
+    });
+};
+
+export const activateAccount = async (uid: string, token: string) => {
+    return apiCall(ENDPOINTS.auth.activation, {
+        method: 'POST',
+        body: JSON.stringify({ uid, token }),
     });
 };
 
