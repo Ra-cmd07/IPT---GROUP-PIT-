@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from djoser.serializers import UserCreateSerializer as DjoserUserCreateSerializer
 from .models import UserProfile
 
 
@@ -17,42 +18,45 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'profile']
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
-    password_confirm = serializers.CharField(write_only=True, min_length=8)
+class UserCreateSerializer(DjoserUserCreateSerializer):
+    name = serializers.CharField(required=True)
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
     address = serializers.CharField(required=False, allow_blank=True)
     age = serializers.IntegerField(required=False, allow_null=True)
     birthday = serializers.DateField(required=False, allow_null=True)
 
-    class Meta:
-        model = User
-        fields = ['username', 'email', 'password', 'password_confirm', 'first_name', 'last_name', 'address', 'age', 'birthday']
-
-    def validate_email(self, value):
-        """Check that email is unique"""
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("Email already in use. Please use a different email or try logging in.")
-        return value
+    class Meta(DjoserUserCreateSerializer.Meta):
+        fields = ('id', 'email', 'username', 'password', 're_password', 'name', 'first_name', 'last_name', 'address', 'age', 'birthday')
 
     def validate(self, data):
-        if data['password'] != data.pop('password_confirm'):
-            raise serializers.ValidationError({'password': 'Passwords do not match.'})
+        # Call parent validation first
+        data = super().validate(data)
+        
+        # Split name into first_name and last_name
+        if data.get('name') and not data.get('first_name') and not data.get('last_name'):
+            name_parts = data['name'].strip().split()
+            data['first_name'] = name_parts[0]
+            data['last_name'] = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
+        
         return data
 
     def create(self, validated_data):
-        # Extract profile fields before creating user
+        # Extract profile data before calling parent create
         address = validated_data.pop('address', '')
         age = validated_data.pop('age', None)
         birthday = validated_data.pop('birthday', None)
-
-        # Create user
-        user = User.objects.create_user(**validated_data)
+        validated_data.pop('name', None)  # Remove name, already split
         
-        # Update the user's profile with the provided data
-        user.profile.address = address
-        user.profile.age = age
-        user.profile.birthday = birthday
-        user.profile.save()
+        # Call parent create
+        user = super().create(validated_data)
+        
+        # Update profile if it exists
+        if hasattr(user, 'profile'):
+            user.profile.address = address
+            user.profile.age = age
+            user.profile.birthday = birthday
+            user.profile.save()
         
         return user
 

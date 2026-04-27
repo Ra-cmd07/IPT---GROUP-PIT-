@@ -4,6 +4,7 @@ import { register } from '../api';
 
 const Register = () => {
   const [formData, setFormData] = useState({
+    name: '',
     username: '',
     email: '',
     password: '',
@@ -39,6 +40,7 @@ const Register = () => {
 
     try {
       const userData = {
+        name: formData.name,
         username: formData.username,
         email: formData.email,
         password: formData.password,
@@ -106,6 +108,21 @@ const Register = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
                 placeholder="you@example.com"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
+                Full Name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
+                placeholder="John Doe"
               />
             </div>
 
