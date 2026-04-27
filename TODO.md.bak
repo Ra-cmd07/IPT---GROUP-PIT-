@@ -1,0 +1,11 @@
+# Git Commit Task - TODO
+
+- [x] 1. Read and understand the files to commit (settings.py, activation.html)
+- [x] 2. Inspect repo structure and confirm no `.git` exists
+- [x] 3. Get user confirmation on plan
+- [ ] 4. `cd` into actual project root and `git init`
+- [ ] 5. Configure git user name and email
+- [ ] 6. Stage only `kitchen_system/settings.py` and `users/templates/emails/activation.html`
+- [ ] 7. Commit with descriptive message
+- [ ] 8. Verify commit with `git log` and `git status`
+
