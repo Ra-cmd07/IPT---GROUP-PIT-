@@ -1,5 +1,6 @@
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.models import User
@@ -12,6 +13,25 @@ from .serializers import UserSerializer, UserCreateSerializer, UserUpdateSeriali
 class UserViewSet(viewsets.GenericViewSet):
     permission_classes = []
     serializer_class = UserCreateSerializer
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
+
+    def get_serializer_class(self):
+        if self.action == 'register':
+            return UserCreateSerializer
+        if self.action == 'profile':
+            return UserSerializer
+        if self.action == 'profile_update':
+            return UserUpdateSerializer
+        return super().get_serializer_class()
+
+    def get_permissions(self):
+        if self.action in ['login', 'register']:
+            permission_classes = [AllowAny]
+        elif self.action in ['profile', 'profile_update']:
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [AllowAny]
+        return [permission() for permission in permission_classes]
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny], url_path='login')
     def login(self, request):
@@ -86,10 +106,15 @@ class UserViewSet(viewsets.GenericViewSet):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['put'], permission_classes=[IsAuthenticated], url_path='profile/update')
+    @action(detail=False, methods=['get', 'put', 'patch'], permission_classes=[IsAuthenticated], serializer_class=UserUpdateSerializer, url_path='profile/update')
     def profile_update(self, request):
-        """Update current user's profile."""
-        serializer = UserUpdateSerializer(request.user, data=request.data)
+        """Get or update current user's profile."""
+        if request.method == 'GET':
+            serializer = self.get_serializer(request.user)
+            return Response(serializer.data)
+
+        partial = request.method == 'PATCH'
+        serializer = self.get_serializer(request.user, data=request.data, partial=partial)
         if serializer.is_valid():
             serializer.save()
             return Response(

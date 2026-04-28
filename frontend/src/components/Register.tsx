@@ -14,6 +14,7 @@ const Register = () => {
     age: '',
     birthday: '',
   });
+  const [pictureFile, setPictureFile] = useState<File | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -38,19 +39,21 @@ const Register = () => {
     }
 
     try {
-      const userData = {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-        re_password: formData.re_password,
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        address: formData.address,
-        age: formData.age ? parseInt(formData.age) : undefined,
-        birthday: formData.birthday || undefined,
-      };
+      const formPayload = new FormData();
+      formPayload.append('username', formData.username);
+      formPayload.append('email', formData.email);
+      formPayload.append('password', formData.password);
+      formPayload.append('re_password', formData.re_password);
+      formPayload.append('first_name', formData.first_name);
+      formPayload.append('last_name', formData.last_name);
+      formPayload.append('address', formData.address);
+      formPayload.append('age', formData.age ? String(parseInt(formData.age)) : '');
+      formPayload.append('birthday', formData.birthday || '');
+      if (pictureFile) {
+        formPayload.append('picture', pictureFile);
+      }
 
-      await register(userData);
+      await register(formPayload);
       navigate('/login');
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');
@@ -184,6 +187,20 @@ const Register = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
                 placeholder="123 Main St"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="picture" className="block text-sm font-medium text-gray-300 mb-2">
+                Profile Picture (Optional)
+              </label>
+              <input
+                id="picture"
+                name="picture"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setPictureFile(e.target.files?.[0] ?? null)}
+                className="w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-500 file:text-white hover:file:bg-emerald-600"
               />
             </div>
 

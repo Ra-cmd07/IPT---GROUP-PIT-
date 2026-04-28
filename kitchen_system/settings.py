@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'djoser',
     'orders',
     'users',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -88,7 +90,6 @@ DATABASES = {
 }
 
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -155,7 +156,6 @@ SIMPLE_JWT = {
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
-    'USERNAME_REQUIRED': False,
     'USER_CREATE_PASSWORD_RETYPE': True,
     'SEND_ACTIVATION_EMAIL': True,
     'ACTIVATION_URL': 'http://localhost:3000/activate/{uid}/{token}',
@@ -172,10 +172,18 @@ DJOSER = {
     }
 }
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dhhxctw08',
+    'API_KEY': '966894197122486',
+    'API_SECRET': 'HOKZDDJhRNF7cMaC_lgDSZFtEz8',
+}
+
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'cabalitrae6@email.com'
-EMAIL_HOST_PASSWORD = 'bdlotgcnmvdbdcgw'
+EMAIL_HOST_USER = 'cabalitrae6@gmail.com'
+EMAIL_HOST_PASSWORD = 'yenbprvtanaqbsum'
 EMAIL_USE_TLS = True
 
-DEFAULT_FROM_EMAIL = 'cabalitrae6@email.com'
+DEFAULT_FROM_EMAIL = 'cabalitrae6@gmail.com'
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

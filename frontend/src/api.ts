@@ -20,9 +20,12 @@ const ENDPOINTS = {
 const apiCall = async (url: string, options: RequestInit = {}): Promise<any> => {
     const token = localStorage.getItem('access_token');
     const headers: HeadersInit = {
-        'Content-Type': 'application/json',
         ...options.headers,
     };
+
+    if (!(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
 
     if (token) {
         headers['Authorization'] = `JWT ${token}`;
@@ -217,6 +220,13 @@ export const login = async (email: string, password: string) => {
 };
 
 export const register = async (userData: any) => {
+    if (userData instanceof FormData) {
+        return apiCall(ENDPOINTS.auth.register, {
+            method: 'POST',
+            body: userData,
+        });
+    }
+
     return apiCall(ENDPOINTS.auth.register, {
         method: 'POST',
         body: JSON.stringify(userData),
@@ -232,10 +242,19 @@ export const activateAccount = async (uid: string, token: string) => {
 
 export const getProfile = () => apiCall(ENDPOINTS.auth.profile);
 
-export const updateProfile = (data: any) => apiCall(ENDPOINTS.auth.profileUpdate, {
-    method: 'PUT',
-    body: JSON.stringify(data),
-});
+export const updateProfile = (data: any) => {
+    if (data instanceof FormData) {
+        return apiCall(ENDPOINTS.auth.profileUpdate, {
+            method: 'PUT',
+            body: data,
+        });
+    }
+
+    return apiCall(ENDPOINTS.auth.profileUpdate, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+    });
+};
 
 export const logout = () => {
     localStorage.removeItem('access_token');

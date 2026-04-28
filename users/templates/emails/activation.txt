@@ -1,0 +1,8 @@
+Activate your account
+
+Hello {{ user.email }},
+
+Please use this link to activate your account:
+{{ url }}
+
+If you did not request this, ignore this email.

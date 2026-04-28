@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions as django_exceptions
@@ -10,9 +11,11 @@ from .email import CustomActivationEmail
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    picture = serializers.ImageField(read_only=True)
+
     class Meta:
         model = UserProfile
-        fields = ['address', 'age', 'birthday']
+        fields = ['address', 'age', 'birthday', 'picture']
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -35,6 +38,12 @@ class UserCreateSerializer(serializers.ModelSerializer):
     )
     password = serializers.CharField(write_only=True, style={'input_type': 'password'})
     re_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
+    address = serializers.CharField(required=False, allow_blank=True)
+    age = serializers.IntegerField(required=False, allow_null=True)
+    birthday = serializers.DateField(required=False, allow_null=True)
+    picture = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = User
@@ -44,6 +53,12 @@ class UserCreateSerializer(serializers.ModelSerializer):
             'email',
             'password',
             're_password',
+            'first_name',
+            'last_name',
+            'address',
+            'age',
+            'birthday',
+            'picture',
         )
 
     def validate(self, data):
@@ -95,6 +110,19 @@ class UserCreateSerializer(serializers.ModelSerializer):
                     first_name=validated_data.get('first_name', ''),
                     last_name=validated_data.get('last_name', ''),
                 )
+
+                if hasattr(user, 'profile'):
+                    profile = user.profile
+                else:
+                    profile = UserProfile.objects.create(user=user)
+
+                profile.address = validated_data.get('address', profile.address)
+                profile.age = validated_data.get('age', profile.age)
+                profile.birthday = validated_data.get('birthday', profile.birthday)
+                if validated_data.get('picture') is not None:
+                    profile.picture = validated_data.get('picture')
+                profile.save()
+
                 if django_settings.DJOSER.get('SEND_ACTIVATION_EMAIL', False):
                     user.is_active = False
                     user.save(update_fields=['is_active'])
@@ -113,23 +141,28 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     address = serializers.CharField(required=False, allow_blank=True)
     age = serializers.IntegerField(required=False, allow_null=True)
     birthday = serializers.DateField(required=False, allow_null=True)
+    picture = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'address', 'age', 'birthday']
+        fields = ['email', 'first_name', 'last_name', 'address', 'age', 'birthday', 'picture']
 
     def update(self, instance, validated_data):
+        if not hasattr(instance, 'profile'):
+            raise PermissionDenied('Authentication credentials were not provided.')
+
+        profile = instance.profile
         profile_data = {
-            'address': validated_data.pop('address', instance.profile.address),
-            'age': validated_data.pop('age', instance.profile.age),
-            'birthday': validated_data.pop('birthday', instance.profile.birthday),
+            'address': validated_data.pop('address', profile.address),
+            'age': validated_data.pop('age', profile.age),
+            'birthday': validated_data.pop('birthday', profile.birthday),
+            'picture': validated_data.pop('picture', profile.picture),
         }
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        profile = instance.profile
         for attr, value in profile_data.items():
             setattr(profile, attr, value)
         profile.save()

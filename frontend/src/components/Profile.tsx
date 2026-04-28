@@ -12,6 +12,7 @@ interface UserProfile {
     address: string;
     age: number | null;
     birthday: string | null;
+    picture?: string | null;
   };
 }
 
@@ -21,6 +22,7 @@ const Profile = () => {
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [pictureFile, setPictureFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -48,6 +50,7 @@ const Profile = () => {
         age: profile.profile?.age || '',
         birthday: profile.profile?.birthday || '',
       });
+      setPictureFile(null);
     } catch (err: any) {
       setError('Failed to load profile');
       if (err.message.includes('401')) {
@@ -72,14 +75,19 @@ const Profile = () => {
     setSuccess('');
 
     try {
-      await updateProfile({
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email,
-        address: formData.address,
-        age: formData.age ? parseInt(formData.age) : null,
-        birthday: formData.birthday || null,
-      });
+      const payload = new FormData();
+      payload.append('first_name', formData.first_name);
+      payload.append('last_name', formData.last_name);
+      payload.append('email', formData.email);
+      payload.append('address', formData.address);
+      payload.append('age', formData.age ? String(parseInt(formData.age)) : '');
+      payload.append('birthday', formData.birthday || '');
+
+      if (pictureFile) {
+        payload.append('picture', pictureFile);
+      }
+
+      await updateProfile(payload);
       setSuccess('Profile updated successfully!');
       setEditing(false);
       fetchProfile();
@@ -174,6 +182,16 @@ const Profile = () => {
                 <label className="block text-sm font-medium text-gray-400 mb-2">Address</label>
                 <p className="text-white text-lg">{user.profile?.address || 'Not set'}</p>
               </div>
+              {user.profile?.picture && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">Current Picture</label>
+                  <img
+                    src={user.profile.picture}
+                    alt="Profile"
+                    className="w-32 h-32 rounded-2xl object-cover border border-white/20"
+                  />
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -283,6 +301,20 @@ const Profile = () => {
                     className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label htmlFor="picture" className="block text-sm font-medium text-gray-300 mb-2">
+                  Profile Picture
+                </label>
+                <input
+                  id="picture"
+                  name="picture"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setPictureFile(e.target.files?.[0] ?? null)}
+                  className="w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-500 file:text-white hover:file:bg-emerald-600"
+                />
               </div>
 
               <div className="flex gap-4">
