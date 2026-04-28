@@ -158,7 +158,7 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
     'USER_CREATE_PASSWORD_RETYPE': True,
     'SEND_ACTIVATION_EMAIL': True,
-    'ACTIVATION_URL': 'http://localhost:3000/activate/{uid}/{token}',
+    'ACTIVATION_URL': 'http://localhost:5173/activate/{uid}/{token}',
     'EMAIL': {
         'activation': 'users.email.CustomActivationEmail',
     },
