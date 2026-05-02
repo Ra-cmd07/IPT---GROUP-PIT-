@@ -1,0 +1,1 @@
+# Fix Create Order Function and Kitchen Queue\n\n## Steps:\n1. [x] Update App.tsx to render real components (Router + OrderForm/OrderQueue)\n2. [ ] Update api.ts to real React Query hooks with polling/invalidation\n3. [ ] Test live updates\n4. [ ] Optionally start Django backend\n\nCurrent status: Frontend server running. Hot reload will apply changes.
