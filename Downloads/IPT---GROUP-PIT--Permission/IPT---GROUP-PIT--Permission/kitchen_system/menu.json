@@ -1,0 +1,90 @@
+[
+  {
+    "model": "orders.menuitem",
+    "pk": 1,
+    "fields": {
+      "name": "Caesar Salad",
+      "category": "starter",
+      "price": "170.50",
+      "estimated_prep_time": 5,
+      "is_available": true
+    }
+  },
+  {
+    "model": "orders.menuitem",
+    "pk": 2,
+    "fields": {
+      "name": "Tomato Soup",
+      "category": "starter",
+      "price": "99.00",
+      "estimated_prep_time": 7,
+      "is_available": true
+    }
+  },
+  {
+    "model": "orders.menuitem",
+    "pk": 3,
+    "fields": {
+      "name": "Grilled Chicken",
+      "category": "main",
+      "price": "186.00",
+      "estimated_prep_time": 20,
+      "is_available": true
+    }
+  },
+  {
+    "model": "orders.menuitem",
+    "pk": 4,
+    "fields": {
+      "name": "Beef Burger",
+      "category": "main",
+      "price": "285.50",
+      "estimated_prep_time": 15,
+      "is_available": true
+    }
+  },
+  {
+    "model": "orders.menuitem",
+    "pk": 5,
+    "fields": {
+      "name": "Margherita Pizza",
+      "category": "main",
+      "price": "816.00",
+      "estimated_prep_time": 18,
+      "is_available": true
+    }
+  },
+  {
+    "model": "orders.menuitem",
+    "pk": 6,
+    "fields": {
+      "name": "Chocolate Lava Cake",
+      "category": "dessert",
+      "price": "175.00",
+      "estimated_prep_time": 12,
+      "is_available": true
+    }
+  },
+  {
+    "model": "orders.menuitem",
+    "pk": 7,
+    "fields": {
+      "name": "Lemonade",
+      "category": "drink",
+      "price": "65.50",
+      "estimated_prep_time": 2,
+      "is_available": true
+    }
+  },
+  {
+    "model": "orders.menuitem",
+    "pk": 8,
+    "fields": {
+      "name": "Coffee",
+      "category": "drink",
+      "price": "150.00",
+      "estimated_prep_time": 3,
+      "is_available": true
+    }
+  }
+]
